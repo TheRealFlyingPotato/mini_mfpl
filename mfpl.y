@@ -1,14 +1,14 @@
 /*
       mfpl.y
 
- 	Specifications for the MFPL language, YACC input file.
+Specifications for the MFPL language, YACC input file.
 
-      To create syntax analyzer:
+To create syntax analyzer:
 
-        flex mfpl.l
-        bison mfpl.y
-        g++ mfpl.tab.c -o mfpl_parser
-        mfpl_parser < inputFileName
+flex mfpl.l
+	bison mfpl.y
+	g++ mfpl.tab.c -o mfpl_parser
+	mfpl_parser < inputFileName
  */
 
 /*
@@ -86,211 +86,212 @@ extern "C" {
  */
 %%
 N_START		: N_EXPR
-			{
+	 {
 			printRule("START", "EXPR");
 			printf("\n---- Completed parsing ----\n\n");
+			printf("\nValue of the expression is\: ");
 			return 0;
 			}
 			;
 N_EXPR		: N_CONST
-			{
+	{
 			printRule("EXPR", "CONST");
 			$$.type = $1.type; 
 			}
-                | T_IDENT
-                {
+		| T_IDENT
+		{
 			printRule("EXPR", "IDENT");
-                string ident = string($1);
-                TYPE_INFO exprTypeInfo = 
+		string ident = string($1);
+		TYPE_INFO exprTypeInfo = 
 						findEntryInAnyScope(ident);
-                if (exprTypeInfo.type == UNDEFINED) 
-                {
-                  yyerror("Undefined identifier");
-                  return(0);
-               	}
-                $$.type = exprTypeInfo.type; 
+		if (exprTypeInfo.type == UNDEFINED) 
+		{
+		  yyerror("Undefined identifier");
+		  return(0);
+		}
+		$$.type = exprTypeInfo.type; 
 			}
-                | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
-                {
+		| T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
+		{
 			printRule("EXPR", "( PARENTHESIZED_EXPR )");
 			$$.type = $2.type; 
 			}
 			;
 N_CONST		: T_INTCONST
-			{
+	 {
 			printRule("CONST", "INTCONST");
-                $$.type = INT; 
+		$$.type = INT; 
 			}
-                | T_STRCONST
+		| T_STRCONST
 			{
 			printRule("CONST", "STRCONST");
-                $$.type = STR; 
+		$$.type = STR; 
 			}
-                | T_T
-                {
+		| T_T
+		{
 			printRule("CONST", "t");
-                $$.type = BOOL; 
+		$$.type = BOOL; 
 			}
-                | T_NIL
-                {
+		| T_NIL
+		{
 			printRule("CONST", "nil");
 			$$.type = BOOL; 
 			}
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 
-				{
+		     {
 				printRule("PARENTHESIZED_EXPR",
-                                "ARITHLOGIC_EXPR");
+				"ARITHLOGIC_EXPR");
 				$$.type = $1.type; 
 				}
-                      | N_IF_EXPR 
+		      | N_IF_EXPR 
 				{
 				printRule("PARENTHESIZED_EXPR", "IF_EXPR");
 				$$.type = $1.type; 
 				}
-                      | N_LET_EXPR 
+		      | N_LET_EXPR 
 				{
 				printRule("PARENTHESIZED_EXPR", 
-                                "LET_EXPR");
+				"LET_EXPR");
 				$$.type = $1.type; 
 				}
-                      | N_PRINT_EXPR 
+		      | N_PRINT_EXPR 
 				{
 				printRule("PARENTHESIZED_EXPR", 
 					    "PRINT_EXPR");
 				$$.type = $1.type; 
 				}
-                      | N_INPUT_EXPR 
+		      | N_INPUT_EXPR 
 				{
 				printRule("PARENTHESIZED_EXPR",
 					    "INPUT_EXPR");
 				$$.type = $1.type; 
 				}
-                     | N_EXPR_LIST 
+		     | N_EXPR_LIST 
 				{
 				printRule("PARENTHESIZED_EXPR",
-				          "EXPR_LIST");
+					  "EXPR_LIST");
 				$$.type = $1.type; 
 				}
 				;
 N_ARITHLOGIC_EXPR	: N_UN_OP N_EXPR
-				{
+		  {
 				printRule("ARITHLOGIC_EXPR", 
-				          "UN_OP EXPR");
-                      $$.type = BOOL; 
+					  "UN_OP EXPR");
+		      $$.type = BOOL; 
 				}
 				| N_BIN_OP N_EXPR N_EXPR
 				{
 				printRule("ARITHLOGIC_EXPR", 
-				          "BIN_OP EXPR EXPR");
-                      $$.type = BOOL;
-                      switch ($1)
-                      {
-                      case (ARITHMETIC_OP) :
-                        $$.type = INT;
-                        if (!isIntCompatible($2.type)) 
-                        {
-                          yyerror("Arg 1 must be integer");
-                          return(0);
-                     	  }
-                     	  if (!isIntCompatible($3.type)) 
-                       {
-                          yyerror("Arg 2 must be integer");
-                          return(0);
-                     	  }
-                        break;
-
-				case (LOGICAL_OP) :
-                        break;
-
-                      case (RELATIONAL_OP) :
-                        if (!isIntOrStrCompatible($2.type)) 
-                        {
-                          yyerror("Arg 1 must be integer or string");
-                          return(0);
-                        }
-                        if (!isIntOrStrCompatible($3.type)) 
-                        {
-                          yyerror("Arg 2 must be integer or string");
-                          return(0);
-                        }
-                        if (isIntCompatible($2.type) &&
-                            !isIntCompatible($3.type)) 
-                        {
-                          yyerror("Arg 2 must be integer");
-                          return(0);
-                     	  }
-                        else if (isStrCompatible($2.type) &&
-                                 !isStrCompatible($3.type)) 
-                        {
-                               yyerror("Arg 2 must be string");
-                               return(0);
-                             }
-                        break; 
-                      }  // end switch
-				}
-                     	;
-N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
+					  "BIN_OP EXPR EXPR");
+		      $$.type = BOOL;
+		      switch ($1)
+		      {
+		      case (ARITHMETIC_OP) :
+			$$.type = INT;
+			if (!isIntCompatible($2.type)) 
 			{
+			  yyerror("Arg 1 must be integer");
+			  return(0);
+			  }
+			  if (!isIntCompatible($3.type)) 
+		       {
+			  yyerror("Arg 2 must be integer");
+			  return(0);
+			  }
+			break;
+
+case (LOGICAL_OP) :
+			break;
+
+case (RELATIONAL_OP) :
+			if (!isIntOrStrCompatible($2.type)) 
+			{
+			  yyerror("Arg 1 must be integer or string");
+			  return(0);
+			}
+			if (!isIntOrStrCompatible($3.type)) 
+			{
+			  yyerror("Arg 2 must be integer or string");
+			  return(0);
+			}
+			if (isIntCompatible($2.type) &&
+			    !isIntCompatible($3.type)) 
+			{
+			  yyerror("Arg 2 must be integer");
+			  return(0);
+			  }
+			else if (isStrCompatible($2.type) &&
+				 !isStrCompatible($3.type)) 
+			{
+			       yyerror("Arg 2 must be string");
+			       return(0);
+			     }
+			break; 
+		      }  // end switch
+				}
+			;
+N_IF_EXPR    	: T_IF N_EXPR N_EXPR N_EXPR
+	      {
 			printRule("IF_EXPR", "if EXPR EXPR EXPR");
-                $$.type = $3.type | $4.type; 
+		$$.type = $3.type | $4.type; 
 			}
 			;
 N_LET_EXPR      : T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN 
-                  N_EXPR
+		N_EXPR
 			{
 			printRule("LET_EXPR", 
 				    "let* ( ID_EXPR_LIST ) EXPR");
 			endScope();
-                $$.type = $5.type; 
+		$$.type = $5.type; 
 			}
 			;
 N_ID_EXPR_LIST  : /* epsilon */
-			{
+		{
 			printRule("ID_EXPR_LIST", "epsilon");
 			}
-                | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN 
+		| N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN 
 			{
 			printRule("ID_EXPR_LIST", 
-                          "ID_EXPR_LIST ( IDENT EXPR )");
+			  "ID_EXPR_LIST ( IDENT EXPR )");
 			string lexeme = string($3);
-                 TYPE_INFO exprTypeInfo = $4;
-                 printf("___Adding %s to symbol table\n", $3);
-                 bool success = scopeStack.top().addEntry
-                                (SYMBOL_TABLE_ENTRY(lexeme,
+		 TYPE_INFO exprTypeInfo = $4;
+		 printf("___Adding %s to symbol table\n", $3);
+		 bool success = scopeStack.top().addEntry
+				(SYMBOL_TABLE_ENTRY(lexeme,
 									 exprTypeInfo));
-                 if (! success) 
-                 {
-                   yyerror("Multiply defined identifier");
-                   return(0);
-                 }
+		 if (! success) 
+		 {
+		   yyerror("Multiply defined identifier");
+		   return(0);
+		 }
 			}
 			;
 N_PRINT_EXPR    : T_PRINT N_EXPR
-			{
+		{
 			printRule("PRINT_EXPR", "print EXPR");
-                $$.type = $2.type;
+		$$.type = $2.type;
 			}
 			;
 N_INPUT_EXPR    : T_INPUT
-			{
+		{
 			printRule("INPUT_EXPR", "input");
 			$$.type = INT_OR_STR;
 			}
 			;
 N_EXPR_LIST     : N_EXPR N_EXPR_LIST  
-			{
+		{
 			printRule("EXPR_LIST", "EXPR EXPR_LIST");
-                $$.type = $2.type;
+		$$.type = $2.type;
 			}
-                | N_EXPR
+		| N_EXPR
 			{
 			printRule("EXPR_LIST", "EXPR");
-                $$.type = $1.type;
+		$$.type = $1.type;
 			}
 			;
 N_BIN_OP	     : N_ARITH_OP
-			{
+	      {
 			printRule("BIN_OP", "ARITH_OP");
 			$$ = ARITHMETIC_OP;
 			}
@@ -308,10 +309,10 @@ N_BIN_OP	     : N_ARITH_OP
 			}
 			;
 N_ARITH_OP	     : T_ADD
-			{
+		{
 			printRule("ARITH_OP", "+");
 			}
-                | T_SUB
+		| T_SUB
 			{
 			printRule("ARITH_OP", "-");
 			}
@@ -325,7 +326,7 @@ N_ARITH_OP	     : T_ADD
 			}
 			;
 N_REL_OP	     : T_LT
-			{
+	      {
 			printRule("REL_OP", "<");
 			}	
 			| T_GT
@@ -350,7 +351,7 @@ N_REL_OP	     : T_LT
 			}
 			;	
 N_LOG_OP	     : T_AND
-			{
+	      {
 			printRule("LOG_OP", "and");
 			}	
 			| T_OR
@@ -359,7 +360,7 @@ N_LOG_OP	     : T_AND
 			}
 			;
 N_UN_OP	     : T_NOT
-			{
+	     {
 			printRule("UN_OP", "not");
 			}
 			;
@@ -371,15 +372,15 @@ extern FILE *yyin;
 bool isIntCompatible(const int theType) 
 {
   return((theType == INT) || (theType == INT_OR_STR) ||
-         (theType == INT_OR_BOOL) || 
-         (theType == INT_OR_STR_OR_BOOL));
+	 (theType == INT_OR_BOOL) || 
+	 (theType == INT_OR_STR_OR_BOOL));
 }
 
 bool isStrCompatible(const int theType) 
 {
   return((theType == STR) || (theType == INT_OR_STR) ||
-         (theType == STR_OR_BOOL) || 
-         (theType == INT_OR_STR_OR_BOOL));
+	 (theType == STR_OR_BOOL) || 
+	 (theType == INT_OR_STR_OR_BOOL));
 }
 
 bool isIntOrStrCompatible(const int theType) 
@@ -424,17 +425,23 @@ void cleanUp()
   if (scopeStack.empty()) 
     return;
   else {
-        scopeStack.pop();
-        cleanUp();
+	scopeStack.pop();
+	cleanUp();
   }
 }
 
-int main() 
+int main(int argc, char** argv)
 {
-  do {
-	yyparse();
-  } while (!feof(yyin));
-
-  cleanUp();
+	if (argc < 2) 
+	{
+		printf("You must specify a file in the command line!\n");
+		exit(1);
+	}
+	yyin = fopen(argv[1], "r");
+	do 
+	{
+		yyparse();
+	} while (!feof(yyin));
+	cleanUp();
   return 0;
 }

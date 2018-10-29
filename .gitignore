@@ -1,0 +1,4 @@
+lex.yy.c
+mfpl.tab.c
+mfpl_eval
+out
