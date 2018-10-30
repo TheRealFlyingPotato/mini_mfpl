@@ -35,6 +35,12 @@ bool isIntCompatible(const int theType);
 bool isStrCompatible(const int theType);
 bool isIntOrStrCompatible(const int theType);
 
+string convertFromBool(const bool b)
+{
+	// cout << "DEBUG::" << b << endl;
+	return b ? "t" : "nil";
+}
+
 void beginScope();
 void endScope();
 void cleanUp();
@@ -70,7 +76,7 @@ extern "C" {
 %token  T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT	 
 %token  T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type	<text> T_IDENT
+%type	<text> T_IDENT T_STRCONST
 %type <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR  
 %type <typeInfo> N_CONST N_IF_EXPR N_PRINT_EXPR N_INPUT_EXPR 
 %type <typeInfo> N_LET_EXPR N_EXPR_LIST  
@@ -90,6 +96,11 @@ N_START		: N_EXPR
 			printRule("START", "EXPR");
 			printf("\n---- Completed parsing ----\n\n");
 			printf("\nValue of the expression is\: ");
+			if ($1.type == BOOL)
+				cout << convertFromBool($1.boolVal);
+			printf("\n");
+			//printf("\Type of the expression is\: ");
+			//cout << $1.type;
 			return 0;
 			}
 			;
@@ -120,22 +131,27 @@ N_EXPR		: N_CONST
 N_CONST		: T_INTCONST
 	 {
 			printRule("CONST", "INTCONST");
-		$$.type = INT; 
+		  $$.type = INT;
+			//$$.intVal = $1;
 			}
 		| T_STRCONST
 			{
 			printRule("CONST", "STRCONST");
-		$$.type = STR; 
+		  $$.type = STR;
+			//string s = string($1);
+			//$$.stringVal = $1;
 			}
 		| T_T
 		{
 			printRule("CONST", "t");
-		$$.type = BOOL; 
+		  $$.type = BOOL;
+			$$.boolVal = 1;
 			}
 		| T_NIL
 		{
 			printRule("CONST", "nil");
 			$$.type = BOOL; 
+			$$.boolVal = 0;
 			}
 			;
 N_PARENTHESIZED_EXPR	: N_ARITHLOGIC_EXPR 

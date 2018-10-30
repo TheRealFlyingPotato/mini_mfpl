@@ -19,6 +19,9 @@ using namespace std;
 typedef struct 
 { 
   int type;       // one of the above type codes
+  bool boolVal;
+  char* stringVal;
+  int intVal;
 } TYPE_INFO;
 
 class SYMBOL_TABLE_ENTRY 
@@ -33,7 +36,7 @@ public:
   SYMBOL_TABLE_ENTRY( ) 
   { 
     name = ""; 
-    typeInfo.type = UNDEFINED; 
+    typeInfo.type = UNDEFINED;
   }
 
   SYMBOL_TABLE_ENTRY(const string theName, 
