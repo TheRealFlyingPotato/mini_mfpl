@@ -43,7 +43,7 @@ public:
                      const TYPE_INFO theType) 
   {
     name = theName;
-    typeInfo.type = theType.type;
+    typeInfo = theType;
   }
 
   // Accessors

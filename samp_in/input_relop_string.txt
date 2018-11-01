@@ -1,0 +1,1 @@
+ ((print "Enter something: ")( or nil (input) ))

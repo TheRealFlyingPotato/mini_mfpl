@@ -122,10 +122,12 @@ COMMENT           ";".*$
 			}
 {INTCONST}	     {
 			printf("TOKEN: INTCONST  LEXEME: %s\n", yytext);
+			yylval.text = strdup(yytext);
 			return T_INTCONST;
 			}
 {STRCONST}	     {
 			printf("TOKEN: STRCONST  LEXEME: %s\n", yytext);
+			yylval.text = strdup(yytext);
 			return T_STRCONST;
 			}
 {IDENT}		{
